@@ -8,50 +8,32 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
-      user-select: none;
-    }
-
-    .container {
-      position: relative;
-      width: 100%;
-      height: 100vh;
-      overflow: hidden;
+      user-select: none; /* Desactiva selección de texto general */
     }
 
     iframe {
       width: 100%;
-      height: 100%;
+      height: 100vh;
       border: none;
-    }
-
-    /* Capa de protección con márgenes libres para scroll */
-    .overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 15px; /* margen derecho para scrollbar vertical */
-      bottom: 15px; /* margen inferior para scrollbar horizontal */
-      background: transparent;
-      z-index: 10;
     }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <iframe src="https://docs.google.com/spreadsheets/d/1cicl5JAiq_NTLQybn6_UyQmXNmZSjsO2FXprpR6EM0U/preview?rm=minimal&gid=2135465461"></iframe>
-  <div class="overlay"></div>
-</div>
+<!-- iframe interactivo -->
+<iframe src="https://docs.google.com/spreadsheets/d/1cicl5JAiq_NTLQybn6_UyQmXNmZSjsO2FXprpR6EM0U/preview?rm=minimal&gid=2135465461"></iframe>
 
 <script>
-  // Evita copiar, clic derecho y seleccionar texto solo sobre overlay
-  const overlay = document.querySelector('.overlay');
-  overlay.addEventListener('contextmenu', event => event.preventDefault());
-  overlay.addEventListener('keydown', event => {
-    if (event.ctrlKey && ['c', 'x', 's'].includes(event.key)) {
+  // Bloquear clic derecho y teclas de copiado en todo el documento principal
+  document.addEventListener('contextmenu', event => event.preventDefault());
+  document.addEventListener('keydown', event => {
+    if (event.ctrlKey && ['c', 'x', 's', 'a'].includes(event.key.toLowerCase())) {
       event.preventDefault();
     }
   });
+
+  // Evitar que se seleccione texto accidentalmente en la página principal
+  document.addEventListener('selectstart', event => event.preventDefault());
 </script>
 
 </body>

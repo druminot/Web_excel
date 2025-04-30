@@ -4,36 +4,43 @@
   <meta charset="UTF-8">
   <title>Visualización Protegida de Google Sheets</title>
   <style>
-    body, html {
+    body {
       margin: 0;
       padding: 0;
       overflow: hidden;
-      user-select: none; /* Desactiva selección de texto general */
     }
 
     iframe {
       width: 100%;
       height: 100vh;
       border: none;
+      pointer-events: none; /* evita interacciones directas como copiar texto */
+    }
+
+    /* Evita selección de texto en toda la página */
+    body {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
   </style>
 </head>
 <body>
 
-<!-- iframe interactivo -->
-<iframe src="https://docs.google.com/spreadsheets/d/1cicl5JAiq_NTLQybn6_UyQmXNmZSjsO2FXprpR6EM0U/preview?rm=minimal&gid=2135465461"></iframe>
+<!-- Inserta aquí el iframe del Google Sheet -->
+<iframe
+  src="https://docs.google.com/spreadsheets/d/1cicl5JAiq_NTLQybn6_UyQmXNmZSjsO2FXprpR6EM0U/preview?rm=minimal&gid=2135465461"
+></iframe>
 
+<!-- Protección adicional: bloquea clic derecho y teclas de copiado -->
 <script>
-  // Bloquear clic derecho y teclas de copiado en todo el documento principal
   document.addEventListener('contextmenu', event => event.preventDefault());
   document.addEventListener('keydown', event => {
-    if (event.ctrlKey && ['c', 'x', 's', 'a'].includes(event.key.toLowerCase())) {
+    if (event.ctrlKey && (event.key === 'c' || event.key === 'x' || event.key === 's')) {
       event.preventDefault();
     }
   });
-
-  // Evitar que se seleccione texto accidentalmente en la página principal
-  document.addEventListener('selectstart', event => event.preventDefault());
 </script>
 
 </body>

@@ -2,46 +2,62 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Visualización Protegida de Google Sheets</title>
+  <title>Visor de Google Sheet Protegido</title>
   <style>
     body {
       margin: 0;
       padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
       overflow: hidden;
+    }
+
+    .contenedor {
+      width: 100vw;
+      height: 100vh;
+      overflow: auto;
+      border: 4px solid #444;
+      box-sizing: border-box;
+    }
+
+    .marco {
+      width: 10600px;  /* Doble del anterior: 106 columnas x ~100 px */
+      height: 40000px; /* 2000 filas x ~20 px */
+      pointer-events: none;
     }
 
     iframe {
       width: 100%;
-      height: 100vh;
+      height: 100%;
       border: none;
-      pointer-events: none; /* evita interacciones directas como copiar texto */
     }
 
-    /* Evita selección de texto en toda la página */
     body {
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
+      -webkit-touch-callout: none;
     }
   </style>
 </head>
-<body>
+<body oncontextmenu="return false" onkeydown="bloquearTeclas(event)">
+  <div class="contenedor">
+    <div class="marco">
+      <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRD1T-R67pYE-WXnUHEXpWLzHCtfvODaC3DvFH039sfF0UiKu0Te4PZzVSJ0jzijQYrD-X0tHElm71k/pubhtml?gid=2135465461&amp;single=true"></iframe>
+    </div>
+  </div>
 
-<!-- Inserta aquí el iframe del Google Sheet -->
-<iframe
-  src="https://docs.google.com/spreadsheets/d/1cicl5JAiq_NTLQybn6_UyQmXNmZSjsO2FXprpR6EM0U/preview?rm=minimal&gid=2135465461"
-></iframe>
-
-<!-- Protección adicional: bloquea clic derecho y teclas de copiado -->
-<script>
-  document.addEventListener('contextmenu', event => event.preventDefault());
-  document.addEventListener('keydown', event => {
-    if (event.ctrlKey && (event.key === 'c' || event.key === 'x' || event.key === 's')) {
-      event.preventDefault();
+  <script>
+    function bloquearTeclas(e) {
+      const bloqueadas = ['c', 'u', 's'];
+      if ((e.ctrlKey || e.metaKey) && bloqueadas.includes(e.key.toLowerCase())) {
+        e.preventDefault();
+      }
+      if (e.key === "F12") {
+        e.preventDefault();
+      }
     }
-  });
-</script>
 
+    document.addEventListener('copy', e => e.preventDefault());
+  </script>
 </body>
 </html>

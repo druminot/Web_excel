@@ -1,64 +1,134 @@
 <!DOCTYPE html>
 <html lang="es">
-  
 <head>
   <meta charset="UTF-8">
-  <title>Visor Protegido</title>
+  <title>Cargando..</title>
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      overflow: hidden;
-    }
-
-    .contenedor {
-      width: 100vw;
-      height: 100vh;
-      overflow: auto;
-      border: 4px solid #444;
-      box-sizing: border-box;
-    }
-
-    .marco {
-      width: 10600px;  /* Doble del anterior: 106 columnas x ~100 px */
-      height: 40000px; /* 2000 filas x ~20 px */
-      pointer-events: none;
-    }
-
-    iframe {
+    table {
+      border-collapse: collapse;
       width: 100%;
-      height: 100%;
-      border: none;
     }
-
-    body {
-      -webkit-touch-callout: none;
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+    }
+    th input {
+      width: 100%;
+      box-sizing: border-box;
     }
   </style>
 </head>
-<body oncontextmenu="return false" onkeydown="bloquearTeclas(event)">
-  <div class="contenedor">
-    <div class="marco">
-      <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRD1T-R67pYE-WXnUHEXpWLzHCtfvODaC3DvFH039sfF0UiKu0Te4PZzVSJ0jzijQYrD-X0tHElm71k/pubhtml?gid=2135465461&amp;single=true"></iframe>
-    </div>
-  </div>
+<body>
+  <h2>Datos desde Google Sheets</h2>
+  <table id="data-table">
+    <thead id="table-head"></thead>
+    <tbody id="table-body"></tbody>
+  </table>
 
   <script>
-    function bloquearTeclas(e) {
-      const bloqueadas = ['c', 'u', 's'];
-      if ((e.ctrlKey || e.metaKey) && bloqueadas.includes(e.key.toLowerCase())) {
-        e.preventDefault();
-      }
-      if (e.key === "F12") {
-        e.preventDefault();
-      }
-    }
+    const apiKey = 'AIzaSyDepKtrzBIBbQiebMwL5BZi8UhLJYQIRU4';
+    const sheetId = '1cicl5JAiq_NTLQybn6_UyQmXNmZSjsO2FXprpR6EM0U';
+    const range = '3WLA'; // Asegúrate que sea el nombre real de la hoja
 
-    document.addEventListener('copy', e => e.preventDefault());
+    fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?includeGridData=true&ranges=${range}&key=${apiKey}`)
+      .then(res => res.json())
+      .then(data => {
+        const grid = data.sheets[0].data[0].rowData;
+        const thead = document.getElementById('table-head');
+        const tbody = document.getElementById('table-body');
+
+        thead.innerHTML = '';
+        tbody.innerHTML = '';
+
+        // Extrae cabecera desde fila 9 (index 8)
+        const headerRow = document.createElement('tr');
+        const filterRow = document.createElement('tr');
+        const headers = (grid[8].values || []).map(cell => cell.formattedValue || '');
+
+        headers.forEach((header, i) => {
+          const th = document.createElement('th');
+          th.textContent = header;
+          headerRow.appendChild(th);
+
+          const filterTh = document.createElement('th');
+
+          if (header === 'Disciplina\nCODELCO' || header === 'Disciplina\nARCADIS') {
+            const select = document.createElement('select');
+            const uniqueValues = new Set();
+            for (let r = 9; r < grid.length; r++) {
+              const cell = grid[r].values?.[i];
+              if (cell?.formattedValue) {
+                uniqueValues.add(cell.formattedValue);
+              }
+            }
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Todos';
+            select.appendChild(defaultOption);
+            Array.from(uniqueValues).sort().forEach(value => {
+              const option = document.createElement('option');
+              option.value = value;
+              option.textContent = value;
+              select.appendChild(option);
+            });
+            select.addEventListener('change', () => applyFilter(i, select.value));
+            filterTh.appendChild(select);
+          }
+
+          filterRow.appendChild(filterTh);
+        });
+
+        thead.appendChild(headerRow);
+        thead.appendChild(filterRow);
+
+        // Resto de filas
+        for (let r = 9; r < grid.length; r++) {
+          const row = grid[r];
+          if (!row.values) continue;
+          const tr = document.createElement('tr');
+
+          row.values.forEach((cell, i) => {
+            const td = document.createElement('td');
+            td.textContent = cell.formattedValue || '';
+
+            const bg = cell.effectiveFormat?.backgroundColor;
+            if (bg) {
+              const r = Math.round((bg.red || 0) * 255);
+              const g = Math.round((bg.green || 0) * 255);
+              const b = Math.round((bg.blue || 0) * 255);
+              td.style.backgroundColor = `rgb(${r},${g},${b})`;
+            }
+
+            td.style.userSelect = 'none';
+            td.style.webkitUserSelect = 'none';
+            td.style.MozUserSelect = 'none';
+            td.style.msUserSelect = 'none';
+            td.oncopy = e => e.preventDefault();
+
+            tr.appendChild(td);
+          });
+
+          tbody.appendChild(tr);
+        }
+
+        function applyFilter(colIndex, query) {
+          const trList = tbody.querySelectorAll('tr');
+          trList.forEach(tr => {
+            const cell = tr.children[colIndex];
+            // Si query está vacío ('Todos'), mostrar todo
+            if (!query) {
+              tr.style.display = '';
+              return;
+            }
+            const match = cell.textContent === query;
+            tr.style.display = match ? '' : 'none';
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error al obtener datos con formato:', error);
+        alert('Verifica el nombre de la hoja o revisa el uso de includeGridData.');
+      });
   </script>
 </body>
 </html>

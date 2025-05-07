@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Tabla</title>
+  <title>Cargando..</title>
   <style>
     table {
       border-collapse: collapse;
@@ -19,7 +19,7 @@
   </style>
 </head>
 <body>
-  <h2>Cargando...</h2>
+  <h2>Datos desde Google Sheets</h2>
   <table id="data-table">
     <thead id="table-head"></thead>
     <tbody id="table-body"></tbody>
@@ -52,7 +52,7 @@
 
           const filterTh = document.createElement('th');
 
-          if (header === 'Disciplina\nCODELCO' || header === 'Disciplina\nARCADIS') {
+          if (header === 'Disciplina\nCODELCO'  || header === 'Descripción Entyregable') {
             const select = document.createElement('select');
             const uniqueValues = new Set();
             for (let r = 9; r < grid.length; r++) {
